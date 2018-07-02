@@ -18,14 +18,14 @@ const whiteList = ['/login']//白名单
 router.beforeEach((to, from, next) => {
 	console.log("to:"+to.path + "      from:"+from.path);
   NProgress.start();
-  console.info(getToken());
+  console.info("token:" + getToken());
   if (getToken()) { // determine if there has token
     /* has token*/
     if (to.path === '/login') {
       next({ path: '/' })
       NProgress.done();
     } else {
-    	console.info(store.getters.roles.length);
+    	console.info("roles长度:" + store.getters.roles.length);
     	next()
       if (store.getters.roles.length === 0) { // 判断当前用户是否已拉取完user_info信息
         store.dispatch('GetUserInfo').then(res => { // 拉取user_info
