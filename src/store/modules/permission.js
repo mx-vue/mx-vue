@@ -1,7 +1,7 @@
 import api from '../../views/login/service'
 import {
-  asyncRouterMap/*,
-  constantRouterMap*/
+  asyncRouterMap,
+  constantRouterMap
 } from '@/router'
 
 /**
@@ -9,41 +9,54 @@ import {
  * @param roles
  * @param route
  */
-function hasPermission(roles, route) {
-  if (route.meta && route.meta.roles) {
-    return roles.some(role => route.meta.roles.indexOf(role) >= 0)
-  } else {
-    return true
-  }
+function hasPermission(route) {
+	let router = "";
+	const map = asyncRouterMap[0].children;
+	for (let i = 0; i < map.length; i++) {
+		if(map[i].path == route.path){
+				router = map[i];
+				//router.meta = route.name;
+	  		break;
+  	}
+	}
+	return router;
 }
 
 /**
  * 递归过滤异步路由表，返回符合用户角色权限的路由表
- * @param asyncRouterMap
- * @param roles
+ * @param list
  */
-function filterAsyncRouter(asyncRouterMap, roles) {
-  const accessedRouters = asyncRouterMap.filter(route => {
-    if (hasPermission(roles, route)) {
-      if (route.children && route.children.length) {
-        route.children = filterAsyncRouter(route.children, roles)
-      }
-      return true
-    }
-    return false
-  })
-  return accessedRouters
+function filterAsyncRouter(list) {
+	const accessedRouters =  [];
+	let recursion = function(menuList){
+		menuList.filter(route => {
+			if(route.children && route.children.length){
+  			recursion(route.children);
+  		}else{
+  			let router = hasPermission(route);
+  			if(router){
+  				accessedRouters.push(router);
+  				route.active = true;
+  			}
+  		}
+		})
+	};
+	recursion(list);
+	asyncRouterMap[0].children = 	accessedRouters;
+	return asyncRouterMap;
 }
 
 const permission = {
   state: {
-    routers: [],//constantRouterMap,
+    routers: [],
     addRouters: [],
     menuRouters: []
   },
   mutations: {
     SET_ROUTERS: (state, routers) => {
-      state.addRouters = routers
+    	let menuRouters = [];
+    	state.menuRouters = routers;
+      /*state.addRouters = routers
       let targetRouter = constantRouterMap.concat(routers)
       state.routers = targetRouter
 
@@ -64,48 +77,17 @@ const permission = {
           }
         }
       }
-
-      state.menuRouters = menuRouters;
+      state.menuRouters = menuRouters;*/
     }
   },
   actions: {
-    GenerateRoutes({
-      commit
-    }, data) {
+    GenerateRoutes({commit}, data) {
       return new Promise(resolve => {
-        /*const {
-          roles
-        } = data
-        let accessedRouters
-        if (roles.indexOf('admin') >= 0) {
-          accessedRouters = asyncRouterMap
-        } else {
-          accessedRouters = filterAsyncRouter(asyncRouterMap, roles)
-        }
-        commit('SET_ROUTERS', accessedRouters)
-        resolve()*/
-      	api.role("qwe", "admin").then(data => {
-      		console.info("aipRole:"+data);
-	         if(data) {
-	         	console.info("通过递归实现动态路由数据");
-	         	/**
-	         	 *思路：通过权限查出可访问菜单、
-	         	 * 			通过递归去匹配asyncRouterMap数据
-	         	 * 			并组出新routers数据
-	         	 */
-	         	console.info(data);
-	         	console.info("asyncRouterMap");
-	         	console.info(asyncRouterMap);
-	         	
-	         	if (data.indexOf('admin') >= 0) {
-	         		
-	         	}
-	         }
-	         resolve()
-	       }).catch(error => {
-	       	console.info('异常');
-	         reject(error)
-	       })
+      	const { roles } = data
+        let accessedRouters = filterAsyncRouter(roles.menuList);
+        commit('SET_ROLES', accessedRouters);
+        commit('SET_ROUTERS', roles.menuList)
+        resolve()
       })
     }
   }
