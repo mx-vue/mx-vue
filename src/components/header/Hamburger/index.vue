@@ -1,6 +1,6 @@
 <template>
 	<el-tooltip effect="white" :content="'显示/隐藏 侧边栏'" :open-delay="1000" :disabled="disabled" placement="bottom" transition="none">
-		<el-button type="tools" size="small" @click="toggleSideBar" :class="{'active':aaa}">
+		<el-button type="tools" size="small" @click="toggleSideBar" :class="{'active':!sidebar.opened}">
 			<span class="tools-icon hamburger"></span>
 		</el-button>
 	</el-tooltip>
@@ -17,9 +17,9 @@ export default {
 	},
 	name: 'hamburger',
 	computed: {
-		/*sidebar() {
+		sidebar() {
 			return this.$store.getters.sidebar
-		}*/
+		}
 	},
 	methods: {
 		toggleSideBar() {

@@ -1,5 +1,5 @@
 <template>
-	<div class="kd-sidebar" >
+	<div class="kd-sidebar" :class="{hidden:!sidebar.opened}">
 		<div class="kd-nav">
 			<div class="kd-nav-group" v-for="(item, index) in menu" :key="item.name" >
 				<div class="kd-nav-group-item">
@@ -15,19 +15,6 @@
 </template>
 
 <script>
-/*const menu = [
-	{name:'菜单1',path:'/abc',children:[
-		{name:'菜单1.1',path:'/home'},
-		{name:'菜单1.2',path:'/home1'},
-		{name:'菜单1.3',path:'/home2'}
-	]},
-	{name:'菜单2',path:'/qwe',children:[
-		{name:'菜单2.1',path:'/demo'},
-		{name:'菜单2.2',path:'/qwe2.2'},
-		{name:'菜单2.3',path:'/qwe2.3'}
-	]},
-	{name:'菜单3',path:'',children:[]}
-];*/
 export default {
 	data() {
 		return {
@@ -36,6 +23,9 @@ export default {
 		}
 	},
 	computed: {
+		sidebar() {
+			return this.$store.getters.sidebar
+		}
 	},
 	methods: {
 	},
